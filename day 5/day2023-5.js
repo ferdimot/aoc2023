@@ -1,10 +1,9 @@
 const fs = require("fs");
 
-fs.readFile("./day 5/test_input.txt", (err, data) => {
+fs.readFile("./day 5/input.txt", (err, data) => {
   const inputLines = data.toString().split("\n");
   numberRegex = /\d+/g;
 
-  console.log(inputLines);
   // cluster each mapping rules
   const almanach = new Map();
 
