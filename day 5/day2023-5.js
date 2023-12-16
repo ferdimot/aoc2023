@@ -1,6 +1,6 @@
 const fs = require("fs");
 
-fs.readFile("./day 5/test_input.txt", (err, data) => {
+fs.readFile("./day 5/input.txt", (err, data) => {
   const inputLines = data.toString().split("\n");
   numberRegex = /\d+/g;
 
@@ -88,7 +88,8 @@ function part2(almanach) {
   }
 
   let startLocation = Number.POSITIVE_INFINITY;
-  seedGroups.forEach((seedGroup) => {
+  seedGroups.forEach((seedGroup, idx) => {
+    console.log("start with group", idx);
     let seed = seedGroup.start;
 
     while (seed < seedGroup.end) {
