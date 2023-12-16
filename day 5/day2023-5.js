@@ -49,15 +49,7 @@ fs.readFile("./day 5/test_input.txt", (err, data) => {
   part1(almanach);
 
   function addToAlmanach() {
-    const mergedMap = tempMapArr.reduce((prev, curr, idx, arr) => {
-      const entries = curr.entries();
-      let next = entries.next();
-      while (next.value) {
-        prev.set(next.value[0], next.value[1]);
-        next = entries.next();
-      }
-      return prev;
-    }, new Map());
+    const mergedMap = tempMapArr;
     almanach.set(mapName, mergedMap);
     tempMapArr = [];
     mapName = undefined;
@@ -73,7 +65,7 @@ function part1(almanach) {
   /**
    * @param seeds {Map}
    */
-  const seeds = almanach.get("seeds");
+  const seeds = almanach.get("seeds")[0];
 
   let startLocation = Number.POSITIVE_INFINITY;
   seeds.forEach((seed) => {
@@ -102,28 +94,7 @@ function parseMapRule(inputString) {
   const destRangeStart = Number(rangeForMap[0]);
   const rangeLength = Number(rangeForMap[2]);
 
-  // create actual mapping for parsedInput
-  const mapRule = createRange(destRangeStart, srcRangeStart, rangeLength);
-
-  return mapRule;
-}
-/**
- *
- * @param {Number} destRangeStart
- * @param {Number} srcRangeStart
- * @param {Number} rangeLen
- * @returns Map
- */
-function createRange(destRangeStart, srcRangeStart, rangeLength) {
-  const map = new Map();
-
-  for (let index = 0; index < rangeLength; index++) {
-    const src = srcRangeStart + index;
-    const dest = destRangeStart + index;
-    map.set(src, dest);
-  }
-
-  return map;
+  return new MappedRange(srcRangeStart, destRangeStart, rangeLength);
 }
 
 /**
@@ -150,11 +121,48 @@ function getLocation(seed, almanach) {
 
   almanachKeys.forEach((key) => {
     if (key == "seeds") return;
-    const currentMap = almanach.get(key);
-    const srcRanges = new Set(currentMap.keys());
-    // create set
-    result = srcRanges.has(result) ? currentMap.get(result) : result;
+    const currentMapRanges = almanach.get(key);
+    for (let index = 0; index < currentMapRanges.length; index++) {
+      const mapRange = currentMapRanges[index];
+      if (mapRange instanceof MappedRange && mapRange.itemInRange(result)) {
+        result = mapRange.destinationForSrc(result);
+        break;
+      }
+    }
   });
 
   return result;
+}
+
+class MappedRange {
+  srcStart = 0;
+  destStart = 0;
+  range = 0;
+
+  offset = 0;
+  /**
+   *
+   * @param {Number} src
+   * @param {Number} dest
+   * @param {Number} range
+   */
+  constructor(src, dest, range) {
+    this.srcStart = src;
+    this.destStart = dest;
+    this.range = range;
+
+    this.offset = dest - src;
+  }
+
+  itemInRange(srcNumber) {
+    let result = false;
+    const rangeStart = this.srcStart;
+    const rangeEnd = this.srcStart + this.range - 1;
+    if (srcNumber >= rangeStart && srcNumber <= rangeEnd) result = true;
+    return result;
+  }
+
+  destinationForSrc(srcNumber) {
+    return srcNumber + this.offset;
+  }
 }
